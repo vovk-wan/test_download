@@ -1,0 +1,123 @@
+version: "3.7"
+networks:
+  iot-net:
+    driver: bridge
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+        - ${RABBITMQ_PORT}:5672
+        - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+        - ./docker-data/rabbitmq/data/:/var/lib/rabbitmq/
+    restart: on-failure
+    networks:
+      - iot-net
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    restart: always
+    privileged: true
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - save=60
+      - loglevel=debug
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ./docker-data/redis/logs:/var/log
+      - ./docker-data/redis/data:/data
+    networks:
+      - iot-net
+
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:14.4-alpine
+    command:
+      - "postgres"
+      - "-c"
+      - "log_destination=stderr"
+      - "-c"
+      - "logging_collector=on"
+      - "-c"
+      - "log_directory=/var/lib/postgresql/data/pg_log"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=512MB"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    restart: on-failure
+    volumes:
+      - ./docker-data/postgres/postgresql-data:/var/lib/postgresql/data
+      - ./docker-data/postgres/pginit/:/docker-entrypoint-initdb.d
+    networks:
+      - iot-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_ROOT_USER} -d ${POSTGRES_ROOT_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:6.10
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - 5004:80
+    depends_on:
+      - postgres
+    networks:
+      - iot-net
+#  app:
+#    build: .
+#    command: sh -c "wait-for postgres:5432 && python manage.py collectstatic --no-input && python manage.py migrate && gunicorn mysite.wsgi -b 0.0.0.0:8000"
+#    container_name: app
+#    depends_on:
+#      - postgres
+#      - rabbitmq
+#    expose:
+#      - "8000"
+#    hostname: app
+#    image: app-image
+#    networks:
+#      - main
+#    restart: on-failure
+#
+#  celery_worker:
+#    command: sh -c "wait-for rabbitmq:5672 && wait-for app:8000 -- celery -A mysite worker -l info"
+#    container_name: celery_worker
+#    depends_on:
+#      - app
+#      - postgres
+#      - rabbitmq
+#    deploy:
+#      replicas: 2
+#      restart_policy:
+#        condition: on-failure
+#      resources:
+#        limits:
+#          cpus: '0.50'
+#          memory: 50M
+#        reservations:
+#          cpus: '0.25'
+#          memory: 20M
+#    hostname: celery_worker
+#    image: app-image
+#    networks:
+#      - main
+#    restart: on-failure
