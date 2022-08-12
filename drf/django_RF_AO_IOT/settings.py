@@ -84,10 +84,8 @@ WSGI_APPLICATION = 'django_RF_AO_IOT.wsgi.application'
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
-# POSTGRES_HOST = os.getenv('POSTGRES_HOST')
-POSTGRES_HOST = os.getenv('CONTAINER_POSTGRES_HOST')
-# POSTGRES_PORT = os.getenv('POSTGRES_PORT')
-POSTGRES_PORT = os.getenv('CONTAINER_POSTGRES_PORT')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT')
 
 DATABASES = {
     'default': {
@@ -156,5 +154,6 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
-# CELERY_TASK_STORAGE = {} # TODO  возможно использовать как контроль задач
 # ***************************** END CELERY SETTINGS **************************
+
+CSV_DIR = BASE_DIR/os.getenv("CSV_DIR")

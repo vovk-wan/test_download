@@ -96,7 +96,7 @@ class CsvProcessingView(GenericAPIView):
                 {'result': 'failed authorization'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        file_name: str = data.get('file_path')
+        file_name: str = data.get('file_name')
         file_url: str = data.get('file_url')
         result = []
         if file_url:

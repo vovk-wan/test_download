@@ -1,13 +1,11 @@
 import codecs
 import csv
-import logging
 from typing import Iterator
 
 import boto3
 import botocore.exceptions
 import requests
 import requests.exceptions
-from celery.backends import cache
 
 from app_api.models import Task
 from django.conf import settings
@@ -15,23 +13,19 @@ from django.conf import settings
 from django_RF_AO_IOT.celery import app
 from celery.utils.log import get_task_logger
 
-TEST_MODE = True
 
 logger = get_task_logger('serveces')
-if TEST_MODE:
+if settings.DEBUG:
     logger.setLevel('INFO')
-# logging.warning()
-
-FILES_PATH = settings.BASE_DIR/'files'
 
 
-def parsing_csv(csv_obj: Iterator, filename: str) -> dict[str, float]:
+def parsing_csv(csv_obj: Iterator, file_name: str) -> dict[str, float]:
     """
     The function reads data from a file and sums every tenth column
     :param csv_obj: csv file of specified format
     :type csv_obj: Iterator
-    :param filename: filename for the process
-    :type filename: str
+    :param file_name: file_name for the process
+    :type file_name: str
     :return: sum of every tenth column
     :rtype: dict[str, float]
     """
@@ -48,7 +42,7 @@ def parsing_csv(csv_obj: Iterator, filename: str) -> dict[str, float]:
         except (ValueError, TypeError) as err:
             next_row = [0] * len_cols
             logger.warning(
-                f'file name: {filename}, str №: {index}, error: {err}')
+                f'file name: {file_name}, str №: {index}, error: {err}')
         except StopIteration as err:
             next_row = [0] * len_cols
             logger.error(f' todo {err}')
@@ -67,7 +61,7 @@ def boto3_file_process(
     :param self celery task
     :param task_pk: task id in bd
     :type task_pk: int
-    :param file_name: filename in bucket
+    :param file_name: file_name in bucket
     :type file_name: str
     :param access_key: access key from account
     :type access_key: str
@@ -100,7 +94,7 @@ def boto3_file_process(
         )
         data = s3.get_object(Bucket=bucket_name, Key=file_name)
         csv_obj = codecs.getreader('utf-8')(data['Body'])
-        result = parsing_csv(csv_obj=csv_obj, filename=file_name)
+        result = parsing_csv(csv_obj=csv_obj, file_name=file_name)
         Task.objects.filter(pk=task_pk).update(status='finished')
     except (botocore.exceptions.EndpointConnectionError,) as err:
         logger.error(err)
@@ -130,7 +124,7 @@ def for_url_file_process(self, task_pk: int, url: str) -> dict[str, float]:
         with requests.get(url, stream=True, timeout=5) as r:
             csv_obj = (line.decode('utf-8') for line in r.iter_lines())
             Task.objects.filter(pk=task_pk).update(status='finished')
-            result = parsing_csv(csv_obj=csv_obj, filename=url)
+            result = parsing_csv(csv_obj=csv_obj, file_name=url)
     except (
             requests.exceptions.MissingSchema,
             requests.exceptions.InvalidSchema,
@@ -161,8 +155,8 @@ def local_file_process(self, task_pk: int, file_name: str) -> dict[str, float]:
         f'kwargs: {self.request.kwargs}'
     )
     try:
-        with open(FILES_PATH/file_name, 'r', encoding='utf8') as csv_file:
-            result = parsing_csv(csv_obj=csv_file, filename=file_name)
+        with open(settings.CSV_DIR/file_name, 'r', encoding='utf8') as csv_file:
+            result = parsing_csv(csv_obj=csv_file, file_name=file_name)
         Task.objects.filter(pk=task_pk).update(status='finished')
     except (FileNotFoundError, IsADirectoryError)as err:
         logger.error(err)
