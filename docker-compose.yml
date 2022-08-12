@@ -91,14 +91,21 @@ services:
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py shell < createadmin.py &&
-             gunicorn --env DJANGO_SETTINGS_MODULE=django_RF_AO_IOT.settings -b 0.0.0.0:8000 -w 3 django_RF_AO_IOT.wsgi"
+             gunicorn --env DJANGO_SETTINGS_MODULE=django_RF_AO_IOT.settings -b 0.0.0.0:8000 -w 3 django_RF_AO_IOT.wsgi&
+             celery -A django_RF_AO_IOT worker -l info&
+             celery -A django_RF_AO_IOT flower django_RF_AO_IOT"
     env_file:
       - ./.env
     ports:
       - '8000:8000'
+      - '5555:5555'
     volumes:
       - ./docker-data/logs:/app/logs/
       - ./docker-data/static:/app/static/
       - ./docker-data/files:/app/files/
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
     networks:
       - iot-net

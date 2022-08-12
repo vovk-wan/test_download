@@ -84,8 +84,10 @@ WSGI_APPLICATION = 'django_RF_AO_IOT.wsgi.application'
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
-POSTGRES_HOST = os.getenv('POSTGRES_HOST')
-POSTGRES_PORT = os.getenv('POSTGRES_PORT')
+# POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_HOST = os.getenv('CONTAINER_POSTGRES_HOST')
+# POSTGRES_PORT = os.getenv('POSTGRES_PORT')
+POSTGRES_PORT = os.getenv('CONTAINER_POSTGRES_PORT')
 
 DATABASES = {
     'default': {
@@ -143,7 +145,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 BROKER = os.getenv("BROKER_URL")  # 'amqp://guest:guest@localhost:5672'
 BACKEND = os.getenv("BACKEND_URL")  # 'redis://:password@host:port/db'

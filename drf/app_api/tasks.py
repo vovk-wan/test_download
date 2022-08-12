@@ -21,11 +21,7 @@ logger = get_task_logger('serveces')
 if TEST_MODE:
     logger.setLevel('INFO')
 # logging.warning()
-ACCESS_KEY = 'YCAJEi_BYVBsymk-7eqKUQan4'
-SECRET_KEY = 'YCPA-2WX7_XlboVLIOXZv0eMjQoNbI-vkldW5Bl8'
-REGION_NAME = 'ru-central1'
-BUCKET_NAME = 'vovkvan'
-ENDPOINT_S3_URL = 'https://storage.yandexcloud.net'
+
 FILES_PATH = settings.BASE_DIR/'files'
 
 
