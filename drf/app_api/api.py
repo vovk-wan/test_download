@@ -45,43 +45,14 @@ class CsvProcessingBoto3View(GenericAPIView, SerializedData):
     serializer_class = GetBoto3TaskSerializer
 
     def post(self, request, *args, **kwargs):
+        data = self.get_data(request=request)
 
-        request_data = request.body.decode('utf8')
-        logger.info(
-            f'{self.__class__.__qualname__}, '
-            f'before json request_data: {request_data}'
-        )
-        try:
-            data = json.loads(request_data)
-        except (AttributeError, json.decoder.JSONDecodeError) as err:
-            logging.error(err)
-            return JsonResponse(
-                {'result': 'fail'}, status=status.HTTP_400_BAD_REQUEST)
-        username: str = data.get('username')
-        password: str = data.get('password')
-        user = authenticate(username=username, password=password)
-        if user is None:
-            return JsonResponse(
-                {'result': 'failed authorization'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        file_name: str = data.get('file_name')
-        access_key: str = data.get('access_key')
-        secret_key: str = data.get('secret_key')
-        region_name: str = data.get('region_name')
-        bucket_name: str = data.get('bucket_name')
-        endpoint_s3_url: str = data.get('endpoint_s3_url')
-        result = []
+        user = self.authorization(
+            username=data['username'], password=data['password'])
 
-        if file_name:
-            task_pk = Task.objects.create(user=user)
-            task = boto3_file_process.delay(
-                task_pk=task_pk.pk, file_name=file_name, access_key=access_key,
-                secret_key=secret_key, region_name=region_name,
-                bucket_name=bucket_name, endpoint_url=endpoint_s3_url)
-            result.append(task.id)
+        task = processing_boto3(**data, user=user)
 
-        return JsonResponse({'task_id': result}, status=status.HTTP_200_OK)
+        return Response(task, status=status.HTTP_201_CREATED)
 
 
 class CsvProcessingView(GenericAPIView):
