@@ -156,4 +156,55 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 # ***************************** END CELERY SETTINGS **************************
 
-CSV_DIR = BASE_DIR/os.getenv("CSV_DIR")
+
+# ***************************** LOGGING CONFIG **************************
+
+LOGS_DIR = BASE_DIR/'logs'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+    },
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s|%(name)s| %(asctime)s line:| %(lineno)s |%(message)s',
+        }
+    },
+    'handlers': {
+        'screen': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'formatter': 'simple',
+            'stream': sys.stderr
+        },
+        'app_handler': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'midnight',
+            'backupCount': 10,
+            'formatter': 'simple',
+            'level': 'WARNING',
+            'filename': LOGS_DIR/'app/app.log'
+        },
+        'task_handler': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'midnight',
+            'backupCount': 10,
+            'formatter': 'simple',
+            'level': 'WARNING',
+            'filename': LOGS_DIR/'task/task.log'
+        }
+    },
+    'loggers': {
+        'task': {
+            'level': 'INFO',
+            'handlers': ['screen', 'task_handler'],
+            'propagate': False,
+        },
+        'app': {
+            'level': 'DEBUG',
+            'handlers': ['screen', 'app_handler'],
+            'propagate': False,
+        }
+    },
+}
