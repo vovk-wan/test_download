@@ -1,20 +1,17 @@
-import json
 import logging
 
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from django.http import JsonResponse
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
-from app_api.models import Task
 from app_api.serializers import (
-    GetloclaAndUrlTaskSerializer, GetBoto3TaskSerializer)
-from app_api.tasks import (
-    local_file_process, boto3_file_process, for_url_file_process)
-from django_RF_AO_IOT.celery import app
+    GetloclaAndUrlTaskSerializer, GetBoto3TaskSerializer,
+    GetCountTasktSerializer, GetTaskResultSerializer
+)
+from app_api.services import processing_url_file, get_result, processing_boto3
 
-logging.basicConfig()
 logger = logging.getLogger('api')
 
 
