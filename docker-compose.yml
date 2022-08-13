@@ -29,7 +29,7 @@ services:
       - save=60
       - loglevel=debug
     ports:
-      - ${REDIS_PORT}:6379
+      - 6380:6379
     volumes:
       - ./docker-data/redis/logs:/var/log
       - ./docker-data/redis/data:/data
@@ -79,6 +79,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - 5004:80
+    restart: on-failure
     depends_on:
       - postgres
     networks:
@@ -99,8 +100,10 @@ services:
     ports:
       - '8000:8000'
       - '5555:5555'
+    restart: on-failure
     volumes:
-      - ./docker-data/logs:/app/logs/
+      - ./docker-data/app_logs/app:/app/logs/app
+      - ./docker-data/app_logs/task:/app/logs/task
       - ./docker-data/static:/app/static/
       - ./docker-data/files:/app/files/
     depends_on:
