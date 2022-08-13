@@ -18,7 +18,25 @@ logging.basicConfig()
 logger = logging.getLogger('api')
 
 
-class CsvProcessingBoto3View(GenericAPIView):
+class SerializedData:
+    serializer_class = None
+
+    def get_data(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        logger.debug(f'data: {serializer.data}')
+
+        return serializer.data
+
+    def authorization(self, username: str, password: str):
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise PermissionDenied
+
+        return user
+
+
+class CsvProcessingBoto3View(GenericAPIView, SerializedData):
     """
     Размещаем новое задание используя boto3.
     Нужно отправить пару логин - пароль для авторизации в системе
