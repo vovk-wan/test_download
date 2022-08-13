@@ -142,6 +142,8 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
+CSV_DIR = os.getenv('CSV_DIR', 'files')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BROKER = os.getenv("BROKER_URL")  # 'amqp://guest:guest@localhost:5672'
