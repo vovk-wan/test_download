@@ -156,7 +156,8 @@ def local_file_process(self, task_pk: int, file_name: str) -> dict[str, float]:
         f'kwargs: {self.request.kwargs}'
     )
     try:
-        with open(settings.CSV_DIR/file_name, 'r', encoding='utf8') as csv_file:
+        file_path = os.path.join(settings.CSV_DIR, file_name)
+        with open(file_path, 'r', encoding='utf8') as csv_file:
             result = parsing_csv(csv_obj=csv_file, file_name=file_name)
         Task.objects.filter(pk=task_pk).update(status='finished')
     except (FileNotFoundError, IsADirectoryError)as err:
