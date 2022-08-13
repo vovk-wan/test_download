@@ -135,6 +135,8 @@ STATICFILES_DIRS = [
 
 CSV_DIR = os.getenv('CSV_DIR', 'files')
 
+CSV_DIR = os.getenv('CSV_DIR', 'files')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BROKER = os.getenv("BROKER_URL")
