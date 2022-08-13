@@ -32,7 +32,7 @@ class GetBoto3TaskSerializer(serializers.Serializer):
     access_key = serializers.CharField(max_length=150)
     secret_key = serializers.CharField(max_length=150)
     region_name = serializers.CharField(max_length=50)
-    endpoint_s3_url = serializers.URLField()
+    endpoint_url = serializers.URLField()
     bucket_name = serializers.CharField(max_length=150)
     file_name = serializers.CharField(max_length=250)
     username = serializers.CharField(max_length=50)
