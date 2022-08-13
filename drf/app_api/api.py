@@ -95,29 +95,20 @@ class GetWorkingTasksView(GenericAPIView, SerializedData):
         return Response({'tasks': tasks}, status=status.HTTP_200_OK)
 
 
-class GetResultView(GenericAPIView):
-    serializer_class = GetloclaAndUrlTaskSerializer
-
+class GetResultView(GenericAPIView, SerializedData):
     """
-    Получаем информацию о процессе, или ответ
-    Размещаем новое задание.
+    Получаем информацию о процессе, или ответ.
     Нужно отправить пару логин - пароль для авторизации в системе
     и ID задачи
     """
+    serializer_class = GetTaskResultSerializer
+
     def post(self, request, *args, **kwargs):
-        request_data: str = request.body.decode('utf-8')
-        try:
-            data: dict = json.loads(request_data)
-        except (AttributeError, json.decoder.JSONDecodeError) as err:
-            logging.error(f'{self.__class__.__qualname__}, exception: {err}')
-            return JsonResponse({'result': 'fail'}, status=status.HTTP_400_BAD_REQUEST)
+        data = self.get_data(request=request)
 
-        request_id: int = data.get('request_id')
+        self.authorization(
+            username=data['username'], password=data['password'])
 
-        task = app.AsyncResult(request_id)
-        if task.status == 'FAILURE':
-            return JsonResponse({'results': 'FAILURE'}, status=status.HTTP_200_OK)
-        if task.ready():
-            task_data: dict = task.get()
-            return JsonResponse({'results': task_data}, status=status.HTTP_200_OK)
-        return JsonResponse({'result': 'wait'}, status=status.HTTP_200_OK)
+        result = get_result(data['task_id'])
+
+        return Response(result, status=status.HTTP_200_OK)
