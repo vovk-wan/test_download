@@ -1,5 +1,7 @@
 import codecs
 import csv
+import logging
+import os.path
 from typing import Iterator
 
 import boto3
@@ -11,10 +13,9 @@ from app_api.models import Task
 from django.conf import settings
 
 from django_RF_AO_IOT.celery import app
-from celery.utils.log import get_task_logger
 
 
-logger = get_task_logger('serveces')
+logger = logging.getLogger('task')
 if settings.DEBUG:
     logger.setLevel('INFO')
 
