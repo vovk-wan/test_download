@@ -78,31 +78,21 @@ class CsvProcessingView(GenericAPIView, SerializedData):
         return Response({'task_id': task_id}, status=status.HTTP_201_CREATED)
 
 
-class GetWorkingTasksView(GenericAPIView):
+class GetWorkingTasksView(GenericAPIView, SerializedData):
     """
     Получаем информацию о незавершенных процессах
     Нужно отправить пару логин - пароль для авторизации в системе
     """
-    serializer_class = GetloclaAndUrlTaskSerializer
+    serializer_class = GetCountTasktSerializer
 
     def post(self, request, *args, **kwargs):
-        request_data: str = request.body.decode('utf-8')
-        try:
-            data: dict = json.loads(request_data)
-        except (AttributeError, json.decoder.JSONDecodeError) as err:
-            logging.error(f'{self.__class__.__qualname__}, exception: {err}')
-            return JsonResponse(
-                {'result': 'fail'}, status=status.HTTP_400_BAD_REQUEST)
-        username: str = data.get('username')
-        password: str = data.get('password')
-        user: User = authenticate(username=username, password=password)
-        if user is None:
-            return JsonResponse(
-                {'result': 'failed authorization'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        data = self.get_data(request=request)
+
+        user = self.authorization(
+            username=data['username'], password=data['password'])
+
         tasks = user.tasks.filter(status='work').count()
-        return JsonResponse({'tasks': tasks}, status=status.HTTP_200_OK)
+        return Response({'tasks': tasks}, status=status.HTTP_200_OK)
 
 
 class GetResultView(GenericAPIView):
