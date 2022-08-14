@@ -115,7 +115,6 @@ def boto3_file_process(
         result = {'error': 'file not found'}
         Task.objects.filter(pk=task_pk).update(status='failed')
 
-
     return result
 
 
