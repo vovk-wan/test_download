@@ -35,9 +35,9 @@ class SerializedData:
 
 class CsvProcessingBoto3View(GenericAPIView, SerializedData):
     """
-    Размещаем новое задание используя boto3.
-    Нужно отправить пару логин - пароль для авторизации в системе
-    имя файла в системе или ссылку на файл размещенный в облаке
+    Posting a new job using boto3.
+    You need to send a pair of login - password for authorization in the system
+    file name in the system or a link to a file hosted in the cloud
     """
     serializer_class = GetBoto3TaskSerializer
 
@@ -54,9 +54,9 @@ class CsvProcessingBoto3View(GenericAPIView, SerializedData):
 
 class CsvProcessingView(GenericAPIView, SerializedData):
     """
-    Размещаем новое задание.
-    Нужно отправить пару логин - пароль для авторизации в системе
-    имя файла в системе или ссылку на файл размещенный в облаке
+    Posting a new assignment.
+    You need to send a pair of login-password for authorization in the system,
+    file name in the system or a link to a file hosted in the cloud
     """
     serializer_class = GetloclaAndUrlTaskSerializer
 
@@ -77,8 +77,8 @@ class CsvProcessingView(GenericAPIView, SerializedData):
 
 class GetWorkingTasksView(GenericAPIView, SerializedData):
     """
-    Получаем информацию о незавершенных процессах
-    Нужно отправить пару логин - пароль для авторизации в системе
+    Get information about pending processes
+    You need to send a pair of login and password for authorization in the system
     """
     serializer_class = GetCountTasktSerializer
 
@@ -94,9 +94,9 @@ class GetWorkingTasksView(GenericAPIView, SerializedData):
 
 class GetResultView(GenericAPIView, SerializedData):
     """
-    Получаем информацию о процессе, или ответ.
-    Нужно отправить пару логин - пароль для авторизации в системе
-    и ID задачи
+    We get information about the process, or a response.
+    You need to send a pair of login - password for authorization in the system
+    and task ID
     """
     serializer_class = GetTaskResultSerializer
 
