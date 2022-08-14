@@ -9,13 +9,17 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 load_dotenv(BASE_DIR / '..' / '.env')
+# load_dotenv(BASE_DIR / '..' / 'my.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,12 +29,14 @@ load_dotenv(BASE_DIR / '..' / '.env')
 SECRET_KEY = 'django-insecure-)b+up17ifam+frbg86r&q&su=e(+!35im0c5@(xemxj5yn8xtr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.getenv('DEBUG', False))
 
 ALLOWED_HOSTS = ['*']
 # CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://localhost',
 #                         'http://127.0.0.1:8000', 'http://127.0.0.1', ]
-CSRF_TRUSTED_ORIGINS = ['http://*']
+
+# CSRF_TRUSTED_ORIGINS = ['http://*']
+
 
 
 # Application definition
@@ -138,6 +144,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+   os.path.join(BASE_DIR, "static"),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
