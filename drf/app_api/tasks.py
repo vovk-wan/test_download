@@ -54,7 +54,7 @@ def parsing_csv(csv_obj: Iterator, file_name: str) -> dict[str, float]:
 
 
 @shared_task(
-    bind=True, autoretry_for=(botocore.exceptions.ReadTimeoutError, Exception),
+    bind=True, autoretry_for=(botocore.exceptions.ReadTimeoutError,),
     retry_backoff=5, retry_jitter=True,
     retry_kwargs={'max_retries': 5, 'countdown': 10}
 )
@@ -103,7 +103,6 @@ def boto3_file_process(
         csv_obj = codecs.getreader('utf-8')(data['Body'])
         result = parsing_csv(csv_obj=csv_obj, file_name=file_name)
         Task.objects.filter(pk=task_pk).update(status='finished')
-        raise Exception()
     except (
             botocore.exceptions.EndpointConnectionError,
 

@@ -84,9 +84,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_RF_AO_IOT.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
@@ -104,8 +101,6 @@ DATABASES = {
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -129,7 +124,6 @@ REST_FRAMEWORK = {
 }
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -141,7 +135,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
 
@@ -150,14 +143,13 @@ STATICFILES_DIRS = [
 ]
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 CSV_DIR = os.getenv('CSV_DIR', 'files')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BROKER = os.getenv("BROKER_URL")  # 'amqp://guest:guest@localhost:5672'
-BACKEND = os.getenv("BACKEND_URL")  # 'redis://:password@host:port/db'
+BROKER = os.getenv("BROKER_URL")
+BACKEND = os.getenv("BACKEND_URL")
 
 CELERY_BROKER_URL = BROKER
 CELERY_RESULT_BACKEND = BACKEND
@@ -165,8 +157,6 @@ CELERY_BROKER_TRANSPORT_OPTION = {'visibility_timeout': 3600}
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-
-# ***************************** END CELERY SETTINGS **************************
 
 
 # ***************************** LOGGING CONFIG **************************
