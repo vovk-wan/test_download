@@ -83,6 +83,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - 5004:80
+    volumes:
+      - ./docker-data/static:/pgadmin4/pgadmin/static
     restart: on-failure
     depends_on:
       - postgres
@@ -115,5 +117,19 @@ services:
       - postgres
       - rabbitmq
       - redis
+    networks:
+      - iot-net
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    hostname: nginx
+    ports:
+      - '80:80'
+    volumes:
+      - ./docker-data/config:/etc/nginx/conf.d
+      - ./docker-data/static:/static
+    depends_on:
+      - app
     networks:
       - iot-net
