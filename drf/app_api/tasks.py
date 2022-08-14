@@ -1,21 +1,22 @@
 import codecs
 import csv
-import logging
 import os.path
 from typing import Iterator
 
 import boto3
+import boto3.exceptions
+import botocore.errorfactory
 import botocore.exceptions
 import requests
 import requests.exceptions
-
-from app_api.models import Task
+from celery import shared_task
+from celery.utils.log import get_task_logger
 from django.conf import settings
 
+from app_api.models import Task
 from django_RF_AO_IOT.celery import app
 
-
-logger = logging.getLogger('task')
+logger = get_task_logger('task')
 if settings.DEBUG:
     logger.setLevel('INFO')
 
@@ -52,7 +53,11 @@ def parsing_csv(csv_obj: Iterator, file_name: str) -> dict[str, float]:
     return {col_name: col_sum for col_name, col_sum in zip(col_name, summ)}
 
 
-@app.task(bind=True)
+@shared_task(
+    bind=True, autoretry_for=(botocore.exceptions.ReadTimeoutError, Exception),
+    retry_backoff=5, retry_jitter=True,
+    retry_kwargs={'max_retries': 5, 'countdown': 10}
+)
 def boto3_file_process(
         self, task_pk: int, file_name: str, access_key: str,
         secret_key: str, region_name: str, bucket_name: str,
@@ -82,6 +87,7 @@ def boto3_file_process(
         f'args: {self.request.args}, '
         f'kwargs: {self.request.kwargs}'
     )
+
     try:
         session = boto3.session.Session(
             aws_access_key_id=access_key,
@@ -97,14 +103,28 @@ def boto3_file_process(
         csv_obj = codecs.getreader('utf-8')(data['Body'])
         result = parsing_csv(csv_obj=csv_obj, file_name=file_name)
         Task.objects.filter(pk=task_pk).update(status='finished')
-    except (botocore.exceptions.EndpointConnectionError,) as err:
+        raise Exception()
+    except (
+            botocore.exceptions.EndpointConnectionError,
+
+        ) as err:
+        logger.error(err)
+        result = {'error': 'connection error'}
+        Task.objects.filter(pk=task_pk).update(status='failed')
+    except (botocore.exceptions.ClientError,) as err:
         logger.error(err)
         result = {'error': 'file not found'}
         Task.objects.filter(pk=task_pk).update(status='failed')
+
+
     return result
 
 
-@app.task(bind=True)
+@shared_task(
+    bind=True, autoretry_for=(requests.exceptions.Timeout,),
+    retry_backoff=5, retry_jitter=True,
+    retry_kwargs={'max_retries': 5, 'countdown': 10}
+)
 def for_url_file_process(self, task_pk: int, url: str) -> dict[str, float]:
     """
     Function to download files by url storage using requests
@@ -122,7 +142,7 @@ def for_url_file_process(self, task_pk: int, url: str) -> dict[str, float]:
         f'kwargs: {self.request.kwargs}'
     )
     try:
-        with requests.get(url, stream=True, timeout=5) as r:
+        with requests.get(url, stream=True, timeout=15) as r:
             csv_obj = (line.decode('utf-8') for line in r.iter_lines())
             Task.objects.filter(pk=task_pk).update(status='finished')
             result = parsing_csv(csv_obj=csv_obj, file_name=url)
