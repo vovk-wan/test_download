@@ -19,25 +19,15 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / '..' / '.env')
-# load_dotenv(BASE_DIR / '..' / 'my.env')
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-)b+up17ifam+frbg86r&q&su=e(+!35im0c5@(xemxj5yn8xtr'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.getenv('DEBUG', False))
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
-# CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://localhost',
-#                         'http://127.0.0.1:8000', 'http://127.0.0.1', ]
-
-# CSRF_TRUSTED_ORIGINS = ['http://*']
-
-
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://localhost',
+                        'http://nginx', 'http://0.0.0.0', 'http://0.0.0.0:8000',
+                        'http://127.0.0.1:8000', 'http://127.0.0.1', ]
 
 # Application definition
 
@@ -67,8 +57,7 @@ ROOT_URLCONF = 'django_RF_AO_IOT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -119,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-    'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     )
 }
 
@@ -139,7 +128,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-   os.path.join(BASE_DIR, "static"),
+   BASE_DIR/'static',
 ]
 
 # Default primary key field type
@@ -170,7 +159,8 @@ LOGGING = {
     },
     'formatters': {
         'simple': {
-            'format': '%(levelname)s|%(name)s| %(asctime)s line:| %(lineno)s |%(message)s',
+            'format': '%(levelname)s|%(name)s| %(asctime)s line:|'
+                      ' %(lineno)s |%(message)s',
         }
     },
     'handlers': {
