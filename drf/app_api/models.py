@@ -8,7 +8,11 @@ class Task(models.Model):
         on_delete=models.CASCADE,
         verbose_name='User'
     )
-    status = models.CharField(max_length=50, default='work', verbose_name='Status')
+    status = models.CharField(
+        max_length=50,
+        default='work',
+        verbose_name='Status'
+    )
 
     class Meta:
         db_table = 'tasks'
